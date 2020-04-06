@@ -89,8 +89,8 @@ function Trails (val){
   this.summary = val[0].summary;
   this.trail_url = val[0].url;
   this.conditions = val[0].conditionDetails;
-  this.condition_date = val[0].conditionDate;
-  this.condition_time = val[0].conditionDate;
+  this.condition_date = new Date (val[0].conditionDate).toString().slice(3,14);
+  this.condition_time = new Date (val[0].conditionDate).toString().slice(15,24);
 }
 
 function notFoundHandler(request, response) {
