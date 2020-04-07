@@ -66,31 +66,37 @@ function Weather(day) {
 }
 
 function trailsHandler(request,response){
-  let lat = request.query.latitude;
-  let lon = request.query.longitude;
-  let key3 = process.env.TRAIL_API_KEY;
+  const lat = request.query.latitude;
+  const lon = request.query.longitude;
 
-  superagent(
-    `https://www.hikingproject.com/data/get-trails?lat=${lat}&lon=${lon}&maxDistance=10&key=${key3}`
-  )
-    .then((trailsRes)=>{
-      const trailsSummaries = trailsRes.body.trails.map((val)=>{
+  getTrailData(lat,lon)
+    .then((trailData) =>
+      response.status(200).json(trailData)
+    );
+}
+function getTrailData(lat,lon){
+  const url =`https://www.hikingproject.com/data/get-trails?lat=${lat}&lon=${lon}&maxDistance=500&key=${process.env.TRAIL_API_KEY}`;
+
+  return superagent.get(url)
+    .then((trailData)=>{
+      let trailsSummaries = trailData.body.trails.map((val)=>{
         return new Trails (val);
       });
-      response.status(200).json(trailsSummaries);})
-    .catch((err)=> errorHandler(err, request, response));
+      return trailsSummaries;
+    });
 }
+
 function Trails (val){
-  this.name = val[0].name;
-  this.location = val[0].location;
-  this.length = val[0].length;
-  this.stars = val[0].stars;
-  this.star_votes = val[0].starVotes;
-  this.summary = val[0].summary;
-  this.trail_url = val[0].url;
-  this.conditions = val[0].conditionDetails;
-  this.condition_date = new Date (val[0].conditionDate).toString().slice(3,14);
-  this.condition_time = new Date (val[0].conditionDate).toString().slice(15,24);
+  this.name = val.name;
+  this.location = val.location;
+  this.length = val.length;
+  this.stars = val.stars;
+  this.star_votes = val.starVotes;
+  this.summary = val.summary;
+  this.trail_url = val.url;
+  this.conditions = val.conditionDetails;
+  this.condition_date = new Date (val.conditionDate).toString().slice(3,14);
+  this.condition_time = new Date (val.conditionDate).toString().slice(15,24);
 }
 
 function notFoundHandler(request, response) {
