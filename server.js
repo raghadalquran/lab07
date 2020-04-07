@@ -68,18 +68,24 @@ function Weather(day) {
 function trailsHandler(request,response){
   let lat = request.query.latitude;
   let lon = request.query.longitude;
-  let key3 = process.env.TRAIL_API_KEY;
 
+  getTrailData(lat,lon)
+    .then((trailData) =>
+      response.status(200).json(trailData)
+    );
+}
+function getTrailData(lat,lon){
   superagent(
-    `https://www.hikingproject.com/data/get-trails?lat=${lat}&lon=${lon}&maxDistance=10&key=${key3}`
+    `https://www.hikingproject.com/data/get-trails?lat=${lat}&lon=${lon}&maxDistance=500&key=${process.env.TRAIL_API_KEY}`
   )
     .then((trailsRes)=>{
       const trailsSummaries = trailsRes.body.trails.map((val)=>{
         return new Trails (val);
       });
-      response.status(200).json(trailsSummaries);})
-    .catch((err)=> errorHandler(err, request, response));
+      return trailsSummaries;
+    });
 }
+
 function Trails (val){
   this.name = val[0].name;
   this.location = val[0].location;
